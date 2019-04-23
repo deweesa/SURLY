@@ -22,4 +22,6 @@ public class RelationParser {
       String attrList = input.substring(input.indexOf('('));
       return attrList.split(",").length;
    }
+   
+   
 }

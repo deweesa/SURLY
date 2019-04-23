@@ -5,18 +5,24 @@ public class Relation
    private LinkedList<Attribute> schema;
    private LinkedList<Tuple> tuples;
    
+   public String getName()
+   {
+      return name;
+   }
+   
    public void print()
    {
-      return;
+      System.out.println("WORK IN PROGRESS");
    }
    
    public void insert(Tuple tuple)
    {
+      tuples.add(tuple);
       return;
    }
    
    public void delete()
    {
-      return;
+      tuples.clear();
    }
 }

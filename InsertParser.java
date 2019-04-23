@@ -42,5 +42,15 @@ public class InsertParser{
       }
       return count;
    }
-
+   
+   public Tuple parseTuple()
+   {
+      Attribute attr = new Attribute();
+      attr.setName(this.parseRelationName());
+      
+      int i = 0;
+      while(input.charAt(i) != ';')
+      {
+         
+   }
 }

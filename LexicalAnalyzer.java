@@ -6,6 +6,9 @@ import java.io.File;
 import java.util.Scanner;
 
 public class LexicalAnalyzer {
+   
+   private SurlyDatabase database;
+   
    public void run(String fileName) {
       Scanner sc;
       try {
@@ -18,6 +21,8 @@ public class LexicalAnalyzer {
       PrintParser pPrint;
       RelationParser pRelation;
       InsertParser pInsert;
+      DeleteParser pDelete;
+      DestroyParser pDestroy;
       String command;
       
       //while the file has lines within it read it out, then send
@@ -53,7 +58,9 @@ public class LexicalAnalyzer {
             else if(command.startsWith("INSERT"))
             {
                pInsert = new InsertParser(command);
-               System.out.println("Inserting " + pInsert.parseAttributeCount() + " attributes to " + pInsert.parseRelationName() + ".");
+               String name = pInsert.parserelationName();
+               Relation relation = database.getRelationName(name);
+               System.out.println("Inserting " + pInsert.parseAttributeCount() + " attributes to " + name + ".");
             }
             else if(command.startsWith("RELATION"))
             {
@@ -63,7 +70,12 @@ public class LexicalAnalyzer {
                   System.out.println("Creating " + pRelation.parseRelationName() + " with " + count + " attributes.");
                else
                   System.out.println("Bad RELATION syntax: unmatched parens");
-            }    
+            } 
+            else if(command.startsWith("DELETE"))
+            {
+               pDelete = new DeleteParser(command);
+               Relation relation = database.get(pDelete.parseRelationName());
+               relation.clear();
          }
       }               
    }
