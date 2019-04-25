@@ -65,7 +65,7 @@ public class InsertParser{
               }
               i++;
 
-              values.push(currentValue);
+              values.add(currentValue);
               currentValue = "";
           }
 
@@ -75,7 +75,7 @@ public class InsertParser{
                   i++;
               }
 
-              values.push(currentValue);
+              values.add(currentValue);
               currentValue = "";
           }
       }
@@ -84,7 +84,7 @@ public class InsertParser{
       for(i = 0; i < values.size(); i ++)
       {
           AttributeValue attr = new AttributeValue(values.get(i));
-          tuple.push(attr);
+          tuple.add(attr);
           System.out.print(attr.getValue()+":");
 
       }

@@ -15,18 +15,23 @@ public class RelationParser {
 
     public RelationParser(String input){
         newest = input;
-        parsedBySpaces = parseRelationName();
+        parsedBySpaces = parse();
         int Attributes = parseAttributeCount();
         //System.out.println("Creating " + needToUse[1] +" with " + Attributes +" attributes");
 
     }
 
-    public String [] parseRelationName(){
+    public String [] parse(){
         String temp = "[ ]+";
 
         String[] out = newest.split(temp);
 
         return out;
+    }
+
+    public String parseRelationName()
+    {
+        return parsedBySpaces[1];
     }
 
     public int parseAttributeCount() {
@@ -64,7 +69,7 @@ public class RelationParser {
                 int length = Integer.parseInt(number);
 
                 needsToBeAdded.setLength(length);
-                toBeReturnedRelation.schema.add(needsToBeAdded);
+                toBeReturnedRelation.addSchema(needsToBeAdded);
                 Attributes++;
             }
         }

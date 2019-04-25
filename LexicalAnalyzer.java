@@ -47,6 +47,11 @@ public class LexicalAnalyzer {
             {
                pPrint = new PrintParser(command);
                String[] relations = pPrint.parseRelationNames();
+               try {
+                  printTable(relations);
+               } catch(Exception e) {
+                  System.out.println(e);
+               }
                if(relations.length > 0)
                {
                   System.out.print("Printing "+relations.length+" relations: "+relations[0]);
@@ -58,9 +63,27 @@ public class LexicalAnalyzer {
             else if(command.startsWith("INSERT"))
             {
                pInsert = new InsertParser(command);
-               String name = pInsert.parserelationName();
-               Relation relation = database.getRelationName(name);
+               Tuple tuple = pInsert.parseTuple();
+               String name = pInsert.parseRelationName();
+               //Relation relation = database.getRelationName(name);
                System.out.println("Inserting " + pInsert.parseAttributeCount() + " attributes to " + name + ".");
+               Relation relation;
+               try
+               {
+                  relation = database.getRelation(name);
+               } catch (Exception e) {
+                  System.out.println(e);
+                  break;
+               }
+
+               if(relation.getSchema().size() != tuple.size())
+               {
+                  System.out.println("Bad INSERT syntax: tuple count and relation attribute count mismatch");
+               }
+
+               //tuple.setNames(relation);
+
+               System.out.println(tuple);
             }
             else if(command.startsWith("RELATION"))
             {
@@ -71,12 +94,72 @@ public class LexicalAnalyzer {
                else
                   System.out.println("Bad RELATION syntax: unmatched parens");
             } 
-            else if(command.startsWith("DELETE"))
-            {
-               pDelete = new DeleteParser(command);
-               Relation relation = database.get(pDelete.parseRelationName());
-               relation.clear();
+            else if(command.startsWith("DELETE")) {
+               //pDelete = new DeleteParser(command);
+               //Relation relation = database.get(pDelete.parseRelationName());
+               //relation.clear();
+            }
          }
       }               
+   }
+
+   public void printTable(String [] names) throws Exception {
+
+      for (int i = 0; i< names.length ; i++){
+
+         printRelation(names[i]);
+         printAttributes(names[i]);
+         printTuples(names[i]);
+
+      }
+
+   }
+   public void printRelation(String name) throws Exception {
+
+      int totalLength = 0;
+
+      for(int x = 0 ; x < database.getRelation(name).getSchema().size(); x++){
+
+         totalLength += database.getRelation(name).getSchema().get(x).getLength();
+
+      }
+
+      System.out.print("|");
+      System.out.printf("%-"+ totalLength+"s",name);
+      System.out.println("|");
+   }
+
+
+   public void printAttributes(String name) throws Exception {
+      for(int y = 0 ; y < database.getRelation(name).getSchema().size(); y++){
+
+         int length = database.getRelation(name).getSchema().get(y).getLength();
+         String attributeName = database.getRelation(name).getSchema().get(y).getName();
+
+         System.out.print("|");
+         System.out.printf("%-" + length + "s",attributeName);
+      }
+
+      System.out.println("|");
+   }
+
+
+   public void printTuples(String name)throws Exception {
+      for (int R = 0; R < database.getRelation(name).getTuples().size(); R++) {
+
+         for(int C = 0 ; C < database.getRelation(name).getSchema().size(); C++){
+
+            int length = database.getRelation(name).getSchema().get(C).getLength();
+            String value = database.getRelation(name).getTuples().get(R).getValue(database.getRelation(name).getSchema().get(C).getName());
+
+            System.out.print("|");
+            System.out.printf("%-" + length + "s",value);
+         }
+
+         System.out.println("|");
+
+
+
+      }
    }
 }

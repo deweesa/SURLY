@@ -9,7 +9,9 @@ public class SurlyDatabase
 
       if(indexOf(name) == -1)
       {
-         throw new Exception();
+         String message = "ERROR: Relation of name "+name+" does not exist.\n";
+         message +=       "     Destruction failed";
+         throw new Exception(message);
       }
       
       return relations.get(index);
