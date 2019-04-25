@@ -1,27 +1,75 @@
-/* Asa DeWeese
- * SURLY 0
- * CSCI 330, 12:00pm
+
+
+import java.util.*;
+import java.io.*;
+/**
+ * Created by malquib2 on 4/4/19.
  */
 public class RelationParser {
-   
-   private String input;
-   
-   RelationParser(String input)
-   {
-      this.input = input.substring(8).trim();
-   }
-   
-   public String parseRelationName()
-   {
-      return input.substring(0, input.indexOf(' '));
-   }
-   
-   public int parseAttributeCount()
-   {
-      if(input.indexOf('(') == -1 || input.indexOf(')') == -1) return -1;
-      String attrList = input.substring(input.indexOf('('));
-      return attrList.split(",").length;
-   }
-   
-   
+
+    public String newest;
+    public String [] parsedBySpaces;
+
+    public Relation toBeReturnedRelation = new Relation();
+    public Attribute needsToBeAdded = new Attribute();
+
+    public RelationParser(String input){
+        newest = input;
+        parsedBySpaces = parseRelationName();
+        int Attributes = parseAttributeCount();
+        //System.out.println("Creating " + needToUse[1] +" with " + Attributes +" attributes");
+
+    }
+
+    public String [] parseRelationName(){
+        String temp = "[ ]+";
+
+        String[] out = newest.split(temp);
+
+        return out;
+    }
+
+    public int parseAttributeCount() {
+        int Attributes = 0;
+        toBeReturnedRelation.setName(parsedBySpaces[1]);
+
+        for(int i = 2; i < parsedBySpaces.length; i++){
+            if(((i % 3) == 2)){
+                String atName =" ";
+                if (i == 2){
+                    atName = parsedBySpaces[i].substring(1,parsedBySpaces[i].length());
+                }else{
+                    atName = parsedBySpaces[i];
+                }
+
+                needsToBeAdded.setName(atName);
+
+            }
+            else if (((i % 3) == 0)){
+                needsToBeAdded.setDatatype(parsedBySpaces[i]);
+            }
+            else if (((i % 3) == 1)){
+                String number = " ";
+
+                if(String.valueOf(parsedBySpaces[i].charAt(parsedBySpaces[i].length()-1)).equals(",")){
+
+                    number = parsedBySpaces[i].substring(0,parsedBySpaces[i].length()-1);
+
+                }
+                else if (String.valueOf(parsedBySpaces[i].charAt(parsedBySpaces[i].length()-1)).equals(";")){
+
+                    number = parsedBySpaces[i].substring(0,parsedBySpaces[i].length()-2);
+
+                }
+                int length = Integer.parseInt(number);
+
+                needsToBeAdded.setLength(length);
+                toBeReturnedRelation.schema.add(needsToBeAdded);
+                Attributes++;
+            }
+        }
+
+        return Attributes;
+
+    }
 }
