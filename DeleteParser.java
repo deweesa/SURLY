@@ -1,12 +1,12 @@
 public class DeleteParser
 {
    private String input;
-   
-   public void DeleteParser(String input)
+
+   DeleteParser(String input)
    {
-      return;
+      this.input = input;
    }
-   
+
    public String parseRealtionName()
    {
       return "in progress";

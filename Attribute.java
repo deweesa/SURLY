@@ -50,4 +50,9 @@ public class Attribute{
       return length;
    }
 
+   public String toString()
+   {
+      return name+"::"+dataType+"::"+length;
+   }
+
 }

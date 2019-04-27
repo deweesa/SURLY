@@ -40,7 +40,7 @@ public class Tuple{
 
    public String toString()
    {
-      return values.toArray().toString();
+      return values.toString();
    }
 }
    

@@ -7,10 +7,57 @@ import java.io.*;
  */
 public class RelationParser {
 
-    public String newest;
+
+    private String input;
+    private String[] attrDefns;
+
+    public RelationParser(String input)
+    {
+        this.input = input;
+    }
+
+    public Relation parseRelation()
+    {
+        Relation relation = new Relation(parseRelationName());
+        int beginAttr = input.indexOf('(')+1;
+        int endAttr = input.lastIndexOf(')');
+        String attributes = input.substring(beginAttr, endAttr);
+
+        System.out.println("__"+attributes+"__");
+
+        attrDefns = attributes.split(",");
+        for(int i = 0; i < attrDefns.length; i++)
+        {
+            attrDefns[i] = attrDefns[i].trim();
+            System.out.println(attrDefns[i]);
+
+            String[] pieces = attrDefns[i].split("\\s+");
+
+            String name = pieces[0];
+            String dataType = pieces[1];
+            int length = Integer.parseInt(pieces[2]);
+
+            relation.addSchema(new Attribute(name, dataType, length));
+
+        }
+        System.out.println(relation);
+        return relation;
+    }
+
+    public int parseAttributeCount()
+    {
+        return 1;
+    }
+
+    public String parseRelationName()
+    {
+        return input.split(" ")[1];
+    }
+
+    /*public String newest;
     public String [] parsedBySpaces;
 
-    public Relation toBeReturnedRelation = new Relation();
+    public Relation toBeReturnedRelation = new Relation(parseRelationName());
     public Attribute needsToBeAdded = new Attribute();
 
     public RelationParser(String input){
@@ -74,7 +121,13 @@ public class RelationParser {
             }
         }
 
+        System.out.println("Relation " + toBeReturnedRelation.getSchema());
+
         return Attributes;
 
     }
+
+    public Relation parseRelation() {
+        return toBeReturnedRelation;
+    }*/
 }

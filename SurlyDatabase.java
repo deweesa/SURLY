@@ -1,7 +1,12 @@
 import java.util.*;
 public class SurlyDatabase
 {
-   private LinkedList<Relation> relations;
+   private LinkedList<Relation> relations = new LinkedList<>();
+
+   SurlyDatabase()
+   {
+      Relation catalog = new Relation("CATALOG");
+   }
    
    public Relation getRelation(String name) throws Exception
    {
@@ -43,7 +48,7 @@ public class SurlyDatabase
          return;
       }
       
-      relations.push(relation);
+      relations.add(relation);
    }
 
    private int indexOf(String name)

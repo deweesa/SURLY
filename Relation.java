@@ -3,8 +3,13 @@ public class Relation
 {
    private String name;
    private LinkedList<Attribute> schema = new LinkedList<>();
-   private LinkedList<Tuple> tuples;
-   
+   private LinkedList<Tuple> tuples = new LinkedList<>();
+
+   Relation(String name)
+   {
+      this.name = name;
+   }
+
    public String getName()
    {
       return name;
@@ -27,11 +32,6 @@ public class Relation
       schema.add(attribute);
    }
 
-   public void print()
-   {
-      System.out.println("WORK IN PROGRESS");
-   }
-   
    public void insert(Tuple tuple)
    {
       tuples.add(tuple);
@@ -45,5 +45,10 @@ public class Relation
    public void delete()
    {
       tuples.clear();
+   }
+
+   public String toString()
+   {
+      return schema.toString();
    }
 }

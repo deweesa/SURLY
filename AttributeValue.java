@@ -33,4 +33,9 @@ public class AttributeValue {
            value = value.substring(0, length-1);
        }
    }
+
+   public String toString()
+   {
+       return name+":"+value;
+   }
 }

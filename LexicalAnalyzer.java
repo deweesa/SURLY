@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class LexicalAnalyzer {
    
-   private SurlyDatabase database;
+   private SurlyDatabase database = new SurlyDatabase();
    
    public void run(String fileName) {
       Scanner sc;
@@ -81,21 +81,23 @@ public class LexicalAnalyzer {
                   System.out.println("Bad INSERT syntax: tuple count and relation attribute count mismatch");
                }
 
-               //tuple.setNames(relation);
-
-               System.out.println(tuple);
+               tuple.setNames(relation);
+               relation.insert(tuple);
             }
             else if(command.startsWith("RELATION"))
             {
                pRelation = new RelationParser(command);
                int count = pRelation.parseAttributeCount();
-               if(count != -1)
+               if(count != -1) {
                   System.out.println("Creating " + pRelation.parseRelationName() + " with " + count + " attributes.");
-               else
+                  database.createRelation(pRelation.parseRelation());
+               }
+               else {
                   System.out.println("Bad RELATION syntax: unmatched parens");
+               }
             } 
             else if(command.startsWith("DELETE")) {
-               //pDelete = new DeleteParser(command);
+               pDelete = new DeleteParser(command);
                //Relation relation = database.get(pDelete.parseRelationName());
                //relation.clear();
             }
@@ -112,6 +114,8 @@ public class LexicalAnalyzer {
          printTuples(names[i]);
 
       }
+
+      System.out.println("***");
 
    }
    public void printRelation(String name) throws Exception {
