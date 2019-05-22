@@ -1,9 +1,9 @@
-import java.util.LinkedList;
-
-/* Asa DeWeese
+/* Asa DeWeese & Ben Malquist
  * SURLY 0
  * CSCI 330, 12:00pm
  */
+
+import java.util.LinkedList;
 public class InsertParser{
    
    private String input;
@@ -50,7 +50,6 @@ public class InsertParser{
       String currentValue = "";
       String attributes = input.substring(input.indexOf(' '));
 
-      //System.out.println(attributes);
       int i = 0;
       while(attributes.charAt(i) != ';')
       {
@@ -85,10 +84,8 @@ public class InsertParser{
       {
           AttributeValue attr = new AttributeValue(values.get(i));
           tuple.add(attr);
-          System.out.print(attr.getValue()+":");
-
       }
-       System.out.println();
+
       return tuple;
    }
 }

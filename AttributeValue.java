@@ -1,3 +1,7 @@
+/* Asa DeWeese & Ben Malquist
+ * SURLY 0
+ * CSCI 330, 12:00pm
+ */
 public class AttributeValue {
    private String name;
    private String value;

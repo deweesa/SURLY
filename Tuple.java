@@ -6,6 +6,11 @@ public class Tuple{
    {
       values.add(attributeValue);
    }
+
+   public AttributeValue get(int i)
+   {
+      return values.get(i);
+   }
    
    public String getValue(String attributeName)
    { 
