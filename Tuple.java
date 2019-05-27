@@ -43,6 +43,10 @@ public class Tuple{
       }
    }
 
+   public void remove(int i) {
+      values.remove(i);
+   }
+
    public String toString()
    {
       return values.toString();

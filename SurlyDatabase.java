@@ -6,6 +6,7 @@ import java.util.*;
 public class SurlyDatabase
 {
    private LinkedList<Relation> relations = new LinkedList<>();
+   private LinkedList<Relation> tempRelations = new LinkedList<>();
 
    SurlyDatabase()
    {
@@ -72,7 +73,7 @@ public class SurlyDatabase
       relations.add(relation);
    }
 
-   private int indexOf(String name)
+   public int indexOf(String name)
    {
       int size = relations.size();
 

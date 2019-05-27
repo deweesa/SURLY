@@ -3,6 +3,7 @@
  * CSCI 330, 12:00pm
  */
 import java.io.File;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 
@@ -57,6 +58,73 @@ public class LexicalAnalyzer {
 
             else if(command.startsWith("DESTROY")) {
                Destroy(command);
+            }
+
+            else if(command.contains("PROJECT")) {
+               ProjectParser pProject = new ProjectParser(command);
+               String tempRelationName = pProject.parseTempName();
+               String baseRelationName = pProject.parseRelationName();
+
+               Relation baseRelation;
+               try {
+                  baseRelation =  database.getRelation(baseRelationName);
+               } catch (Exception e) {
+                  System.out.println(e);
+                  return;
+               }
+
+               LinkedList<Attribute> baseSchema = baseRelation.getSchema();
+               LinkedList<Attribute> tempSchema = new LinkedList<>();
+
+               String[] attributes = pProject.parseAttributes();
+
+               for(int i = 0; i < baseSchema.size(); i++) {
+                  boolean found = false;
+                  for(int j = 0; j < attributes.length; j++) {
+                     if(baseSchema.get(i).getName().equals(attributes[j])){
+                        found = true;
+                     }
+                  }
+
+                  if(found){
+                     tempSchema.add(baseSchema.get(i));
+                  }
+               }
+
+               for(Attribute x : tempSchema) {
+                  System.out.print(x.getName()+"**");
+               }
+               System.out.print("\n");
+
+               LinkedList<Tuple> baseTuple = baseRelation.getTuples();
+               LinkedList<Tuple> tempTuple = new LinkedList<>();
+
+               for(int i = 0; i < baseTuple.size(); i++) {
+                  Tuple tuple = baseTuple.get(i);
+
+                  for(int j = 0; j < tuple.size(); j++) {
+                     AttributeValue attrVal = tuple.get(j);
+                     boolean found = false;
+                     for(int k = 0; k < attributes.length; k++) {
+                        if(attributes[k].equals(attrVal.getName())) {
+                           found = true;
+                        }
+                     }
+
+                     if(!found) {
+                        tuple.remove(j);
+                        j--;
+                     }
+                  }
+
+                  tempTuple.add(tuple);
+               }
+
+               Relation tempRelation = new Relation(tempRelationName);
+               System.out.println("Name of relation: "+pProject.parseRelationName());
+               System.out.println("Name of temp: "+pProject.parseTempName());
+
+
             }
          }
       }               
