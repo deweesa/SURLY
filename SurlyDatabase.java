@@ -23,14 +23,21 @@ public class SurlyDatabase
    {
       int index = indexOf(name);
 
-      if(indexOf(name) == -1)
+      if(index != -1)
       {
-         String message = "ERROR: Relation of name "+name+" does not exist.\n";
-         message +=       "     Get failed";
+         return relations.get(index);
+      }
+
+      index = indexOfTemp(name);
+
+      if(index == -1) {
+         String message = "ERROR: Relation of name " + name + " does not exist.\n";
+         message += "     Get failed";
          throw new Exception(message);
       }
-      
-      return relations.get(index);
+
+      return tempRelations.get(index);
+
    }
    
    public void destroyRelation(String name)
@@ -73,6 +80,20 @@ public class SurlyDatabase
       relations.add(relation);
    }
 
+   public void createTempRelation(Relation relation)
+   {
+      String name = relation.getName();
+
+      if(indexOfTemp(name) != -1)
+      {
+         System.out.println("ERROR: Relation of same name "+name+" already exists.");
+         System.out.println("     Relation failed");
+         return;
+      }
+
+      tempRelations.add(relation);
+   }
+
    public int indexOf(String name)
    {
       int size = relations.size();
@@ -80,6 +101,21 @@ public class SurlyDatabase
       for(int i = 0; i < size; i++)
       {
          if(relations.get(i).getName().equals(name))
+         {
+            return i;
+         }
+      }
+
+      return -1;
+   }
+
+   public int indexOfTemp(String name)
+   {
+      int size = tempRelations.size();
+
+      for(int i = 0; i < size; i++)
+      {
+         if(tempRelations.get(i).getName().equals(name))
          {
             return i;
          }

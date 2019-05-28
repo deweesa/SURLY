@@ -121,8 +121,17 @@ public class LexicalAnalyzer {
                }
 
                Relation tempRelation = new Relation(tempRelationName);
-               System.out.println("Name of relation: "+pProject.parseRelationName());
-               System.out.println("Name of temp: "+pProject.parseTempName());
+               tempRelation.setTuples(tempTuple);
+               tempRelation.setSchema(tempSchema);
+               try {
+                  //tempRelation.print();
+               } catch (Exception e) {
+                  System.out.println(e);
+               }
+
+               database.createTempRelation(tempRelation);
+               //System.out.println("Name of relation: "+pProject.parseRelationName());
+               //System.out.println("Name of temp: "+pProject.parseTempName());
 
 
             }

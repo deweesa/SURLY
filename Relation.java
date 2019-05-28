@@ -43,7 +43,7 @@ public class Relation {
       return tuples;
    }
    public void setTuples(LinkedList tuples) {
-      tuples = tuples;
+      this.tuples = tuples;
    }
    public void delete(){
       tuples.clear();
