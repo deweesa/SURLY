@@ -63,6 +63,33 @@ public class LexicalAnalyzer {
             else if(command.contains("PROJECT")) {
                Project(command);
             }
+
+            else if(command.contains("JOIN")) {
+               JoinParser pJoin = new JoinParser(command);
+               String tempName = pJoin.parseTempName();
+               String[] baseRelations = pJoin.parseBaseRelations();
+               String[] joinCondition = pJoin.parseJoinCondition();
+
+               Relation baseRelationLeft;
+               Relation baseRelationRight;
+               try {
+                  baseRelationLeft = database.getRelation(baseRelations[0]);
+                  baseRelationRight = database.getRelation(baseRelations[1]);
+               } catch (Exception e) {
+                  System.out.println(e);
+                  return;
+               }
+
+               LinkedList<Attribute> leftSchema = baseRelationLeft.getSchema();
+               LinkedList<Attribute> rightSchema = baseRelationRight.getSchema();
+               LinkedList<Attribute> tempSchema = new LinkedList<>();
+
+               for(int i = 0; i < leftSchema.size(); i++) {
+                  for(int j = 0; j < rightSchema.size(); j++) {
+
+                  }
+               }
+            }
          }
       }               
    }
