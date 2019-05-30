@@ -127,4 +127,122 @@ public class Relation {
 
       }
    }
+
+   public void delete(String[][] deleteStack){
+
+      for (int i = tuples.size()-1 ; i >= 0  ; i--){
+         if (checkIfDelete(tuples.get(i),deleteStack)){
+            tuples.remove(i);
+         }
+      }
+
+   }
+
+   public boolean checkIfDelete(Tuple test , String[][] deleteStack){
+
+      String [] temp;
+
+      for(int x = 0 ; x < deleteStack.length ; x++){
+         boolean fullAndCheck = true;
+         for(int y = 0 ; y < deleteStack[x].length ; y++){
+            if (deleteStack[x][y].contains(" = ")){
+
+               temp = deleteStack[x][y].split("=");
+               temp[0] = temp[0].substring(1,temp[0].length()-1);
+               temp[1] = temp[1].substring(1,temp[1].length()-1);
+
+               String value = test.getValue(temp[0]);
+
+               if (value.equals(temp[1]) && fullAndCheck){
+                  fullAndCheck = true;
+               }else{
+                  fullAndCheck = false;
+               }
+
+
+            }else if(deleteStack[x][y].contains(" != ")){
+
+               temp = deleteStack[x][y].split("!=");
+               temp[0] = temp[0].substring(1,temp[0].length()-1);
+               temp[1] = temp[1].substring(1,temp[1].length()-1);
+
+               String value = test.getValue(temp[0]);
+
+               if(!value.equals(temp[1]) && fullAndCheck){
+                  fullAndCheck = true;
+               }else{
+                  fullAndCheck = false;
+               }
+
+
+            }else if(deleteStack[x][y].contains(" < ")){
+
+               temp = deleteStack[x][y].split("<");
+               temp[0] = temp[0].substring(1,temp[0].length()-1);
+               temp[1] = temp[1].substring(1,temp[1].length()-1);
+
+               String value = test.getValue(temp[0]);
+
+               int castToInt = Integer.parseInt(value);
+
+               if(castToInt < Integer.parseInt(temp[1]) && fullAndCheck){
+                  fullAndCheck = true;
+               }else{
+                  fullAndCheck = false;
+               }
+
+
+            }else if(deleteStack[x][y].contains(" > ")){
+               temp = deleteStack[x][y].split(">");
+               temp[0] = temp[0].substring(1,temp[0].length()-1);
+               temp[1] = temp[1].substring(1,temp[1].length()-1);
+
+               String value = test.getValue(temp[0]);
+
+               int castToInt = Integer.parseInt(value);
+
+               if(castToInt > Integer.parseInt(temp[1]) && fullAndCheck){
+                  fullAndCheck = true;
+               }else{
+                  fullAndCheck = false;
+               }
+
+            }else if(deleteStack[x][y].contains(" <= ")){
+
+               temp = deleteStack[x][y].split("<=");
+               temp[0] = temp[0].substring(1,temp[0].length()-1);
+               temp[1] = temp[1].substring(1,temp[1].length()-1);
+
+               String value = test.getValue(temp[0]);
+
+               int castToInt = Integer.parseInt(value);
+
+               if(castToInt <= Integer.parseInt(temp[1]) && fullAndCheck){
+                  fullAndCheck = true;
+               }else{
+                  fullAndCheck = false;
+               }
+
+            }else if(deleteStack[x][y].contains(" >= ")) {
+               temp = deleteStack[x][y].split(">=");
+               temp[0] = temp[0].substring(1, temp[0].length() - 1);
+               temp[1] = temp[1].substring(1, temp[1].length() - 1);
+
+               String value = test.getValue(temp[0]);
+
+               int castToInt = Integer.parseInt(value);
+
+               if (castToInt >= Integer.parseInt(temp[1]) && fullAndCheck) {
+                  fullAndCheck = true;
+               } else {
+                  fullAndCheck = false;
+               }
+            }
+         }
+         if(fullAndCheck){
+            return fullAndCheck;
+         }
+      }
+      return false;
+   }
 }

@@ -14,9 +14,21 @@ public class DeleteParser {
       String temp = "[ ]+";
 
       String[] out = input.split(temp);
-
-      out[1] = out[1].substring(0,out[1].length()-1);
+    if (out.length == 2){
+        out[1] = out[1].substring(0,out[1].length()-1);
+    }
 
       return out [1];
+   }
+   public String parseWhereClause(){
+
+      String[] out = input.split("WHERE");
+        if(out.length<=1){
+            return "no where clause";
+        }
+        else {
+            return out [1];
+        }
+
    }
 }

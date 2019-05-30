@@ -61,79 +61,7 @@ public class LexicalAnalyzer {
             }
 
             else if(command.contains("PROJECT")) {
-               ProjectParser pProject = new ProjectParser(command);
-               String tempRelationName = pProject.parseTempName();
-               String baseRelationName = pProject.parseRelationName();
-
-               Relation baseRelation;
-               try {
-                  baseRelation =  database.getRelation(baseRelationName);
-               } catch (Exception e) {
-                  System.out.println(e);
-                  return;
-               }
-
-               LinkedList<Attribute> baseSchema = baseRelation.getSchema();
-               LinkedList<Attribute> tempSchema = new LinkedList<>();
-
-               String[] attributes = pProject.parseAttributes();
-
-               for(int i = 0; i < baseSchema.size(); i++) {
-                  boolean found = false;
-                  for(int j = 0; j < attributes.length; j++) {
-                     if(baseSchema.get(i).getName().equals(attributes[j])){
-                        found = true;
-                     }
-                  }
-
-                  if(found){
-                     tempSchema.add(baseSchema.get(i));
-                  }
-               }
-
-               for(Attribute x : tempSchema) {
-                  System.out.print(x.getName()+"**");
-               }
-               System.out.print("\n");
-
-               LinkedList<Tuple> baseTuple = baseRelation.getTuples();
-               LinkedList<Tuple> tempTuple = new LinkedList<>();
-
-               for(int i = 0; i < baseTuple.size(); i++) {
-                  Tuple tuple = baseTuple.get(i);
-
-                  for(int j = 0; j < tuple.size(); j++) {
-                     AttributeValue attrVal = tuple.get(j);
-                     boolean found = false;
-                     for(int k = 0; k < attributes.length; k++) {
-                        if(attributes[k].equals(attrVal.getName())) {
-                           found = true;
-                        }
-                     }
-
-                     if(!found) {
-                        tuple.remove(j);
-                        j--;
-                     }
-                  }
-
-                  tempTuple.add(tuple);
-               }
-
-               Relation tempRelation = new Relation(tempRelationName);
-               tempRelation.setTuples(tempTuple);
-               tempRelation.setSchema(tempSchema);
-               try {
-                  //tempRelation.print();
-               } catch (Exception e) {
-                  System.out.println(e);
-               }
-
-               database.createTempRelation(tempRelation);
-               //System.out.println("Name of relation: "+pProject.parseRelationName());
-               //System.out.println("Name of temp: "+pProject.parseTempName());
-
-
+               Project(command);
             }
          }
       }               
@@ -210,6 +138,14 @@ public class LexicalAnalyzer {
 
       String name = pDelete.parseRelationName();
 
+      String Where = pDelete.parseWhereClause();
+
+      WhereParser wDelete = new WhereParser(Where);
+
+      wDelete.parseOrs();
+
+      String [][] parsedByAnds = wDelete.parseAnds();
+
       Relation relation = null;
       try
       {
@@ -221,7 +157,7 @@ public class LexicalAnalyzer {
 
       if(relation != null)
       {
-         relation.delete();
+         relation.delete(parsedByAnds);
       }
    }
 
@@ -249,5 +185,67 @@ public class LexicalAnalyzer {
             System.out.println(e);
          }
       }
+   }
+
+   private void Project(String command) {
+      ProjectParser pProject = new ProjectParser(command);
+      String tempRelationName = pProject.parseTempName();
+      String baseRelationName = pProject.parseRelationName();
+
+      Relation baseRelation;
+      try {
+         baseRelation =  database.getRelation(baseRelationName);
+      } catch (Exception e) {
+         System.out.println(e);
+         return;
+      }
+
+      LinkedList<Attribute> baseSchema = baseRelation.getSchema();
+      LinkedList<Attribute> tempSchema = new LinkedList<>();
+
+      String[] attributes = pProject.parseAttributes();
+
+      for(int i = 0; i < baseSchema.size(); i++) {
+         boolean found = false;
+         for(int j = 0; j < attributes.length; j++) {
+            if(baseSchema.get(i).getName().equals(attributes[j])){
+               found = true;
+            }
+         }
+
+         if(found){
+            tempSchema.add(baseSchema.get(i));
+         }
+      }
+
+      LinkedList<Tuple> baseTuple = baseRelation.getTuples();
+      LinkedList<Tuple> tempTuple = new LinkedList<>();
+
+      for(int i = 0; i < baseTuple.size(); i++) {
+         Tuple tuple = baseTuple.get(i);
+
+         for(int j = 0; j < tuple.size(); j++) {
+            AttributeValue attrVal = tuple.get(j);
+            boolean found = false;
+            for(int k = 0; k < attributes.length; k++) {
+               if(attributes[k].equals(attrVal.getName())) {
+                  found = true;
+               }
+            }
+
+            if(!found) {
+               tuple.remove(j);
+               j--;
+            }
+         }
+
+         tempTuple.add(tuple);
+      }
+
+      Relation tempRelation = new Relation(tempRelationName);
+      tempRelation.setTuples(tempTuple);
+      tempRelation.setSchema(tempSchema);
+
+      database.createTempRelation(tempRelation);
    }
 }

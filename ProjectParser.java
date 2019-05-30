@@ -23,7 +23,7 @@ public class ProjectParser {
 
     public String[] parseAttributes(){
         String unsplitAttr = input.substring(input.indexOf("PROJECT")+7, input.indexOf("FROM"));
-        System.out.println(unsplitAttr);
+
         String[] attrs = unsplitAttr.split(",");
         for(int i = 0; i < attrs.length; i++) {
             attrs[i] = attrs[i].trim();
