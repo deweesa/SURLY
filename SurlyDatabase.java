@@ -39,6 +39,15 @@ public class SurlyDatabase
       return tempRelations.get(index);
 
    }
+
+   public Relation getBaseRelation(String name) throws Exception{
+      int index = indexOf(name);
+      if(index != -1){
+         return relations.get(index);
+      }else {
+         return null;
+      }
+   }
    
    public void destroyRelation(String name)
    {

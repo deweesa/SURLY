@@ -47,6 +47,10 @@ public class Tuple{
       values.remove(i);
    }
 
+   public void addAll(Tuple newTuple) {
+      this.values.addAll(newTuple.values);
+   }
+
    public String toString()
    {
       return values.toString();

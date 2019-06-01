@@ -80,15 +80,123 @@ public class LexicalAnalyzer {
                   return;
                }
 
-               LinkedList<Attribute> leftSchema = baseRelationLeft.getSchema();
-               LinkedList<Attribute> rightSchema = baseRelationRight.getSchema();
+               LinkedList<Attribute> leftSchema = (LinkedList) baseRelationLeft.getSchema().clone();
+               LinkedList<Attribute> rightSchema = (LinkedList) baseRelationRight.getSchema().clone();
                LinkedList<Attribute> tempSchema = new LinkedList<>();
 
+               Attribute leftAttr, rightAttr;
+
+               String leftName;
+               String rightName;
+
                for(int i = 0; i < leftSchema.size(); i++) {
+                  leftAttr = leftSchema.get(i);
+                  leftName = leftAttr.getName();
                   for(int j = 0; j < rightSchema.size(); j++) {
+                     rightAttr = rightSchema.get(j);
+                     rightName = rightAttr.getName();
+                     if(leftName.equals(rightName)) {
+                        leftName = baseRelationLeft.getName()+"."+leftName;
+                        rightName = baseRelationRight.getName()+"."+rightName;
+
+                        Attribute newLeft = new Attribute(leftName, leftAttr.getDatatype(), leftAttr.getLength());
+                        Attribute newRight = new Attribute(rightName, rightAttr.getDatatype(), rightAttr.getLength());
+
+                        leftSchema.set(i, newLeft);
+                        rightSchema.set(j, newRight);
+                     }
+                  }
+               }
+
+               tempSchema.addAll(leftSchema);
+               tempSchema.addAll(rightSchema);
+
+               for(int i = 0; i < tempSchema.size(); i++){
+                  System.out.println(tempSchema.get(i));
+               }
+
+               LinkedList<Tuple> leftTuples = (LinkedList) baseRelationLeft.getTuples().clone();
+               LinkedList<Tuple> rightTuples = (LinkedList) baseRelationRight.getTuples().clone();
+
+               for(int i = 0; i < leftTuples.size(); i++) {
+                  Tuple tuples = leftTuples.get(i);
+                  for(int j = 0; j < tuples.size(); j++) {
+                     AttributeValue attr = tuples.get(j);
+                     attr.setName(leftSchema.get(j).getName());
+                  }
+
+               }
+
+               for(int i = 0; i < rightTuples.size(); i++) {
+                  Tuple tuple = rightTuples.get(i);
+                  for(int j = 0; j < tuple.size(); j++) {
+                     AttributeValue attr = tuple.get(j);
+                     attr.setName(rightSchema.get(j).getName());
+                  }
+               }
+
+               Relation tempLeft = new Relation(baseRelations[0]);
+               tempLeft.setSchema(leftSchema);
+               tempLeft.setTuples(leftTuples);
+
+               Relation tempRight = new Relation(baseRelations[1]);
+               tempRight.setSchema(rightSchema);
+               tempRight.setTuples(rightTuples);
+
+               Relation tempJoined = new Relation(tempName);
+               tempJoined.setSchema(tempSchema);
+               LinkedList<Tuple> joinedTuples = new LinkedList<>();
+
+               int leftColumn = tempLeft.getColumnIndex(joinCondition[0]);
+               int rightCoumn = tempRight.getColumnIndex(joinCondition[2]);
+
+               for(int i = 0; i < leftTuples.size(); i++) {
+                  Tuple leftTuple = leftTuples.get(i);
+                  String leftValue = leftTuple.get(leftColumn).getValue();
+                  for(int j = 0; j < rightTuples.size(); j++){
+                     Tuple rightTuple = rightTuples.get(j);
+                     String rightValue = rightTuple.get(rightCoumn).getValue();
+
+                     if(leftValue.equals(rightValue)) {
+                        Tuple joined = new Tuple();
+                        joined.addAll(leftTuple);
+                        joined.addAll(rightTuple);
+                        joinedTuples.add(joined);
+                     }
 
                   }
                }
+
+               tempJoined.setTuples(joinedTuples);
+               tempJoined.removeAttribute(joinCondition[2]);
+
+               tempSchema = tempJoined.getSchema();
+
+               for(int i = 0; i < tempSchema.size(); i++) {
+                  Attribute attribute = tempSchema.get(i);
+                  String name = attribute.getName();
+
+                  if(name.contains(".")) {
+                     name = name.substring(name.indexOf(".")+1);
+                  }
+                  attribute.setName(name);
+               }
+
+               for(int i = 0; i < joinedTuples.size(); i++) {
+                  Tuple tuple = joinedTuples.get(i);
+                  for(int j = 0; j < tuple.size(); j++) {
+                     AttributeValue value = tuple.get(j);
+                     String name = value.getName();
+
+                     if(name.contains(".")) {
+                        name = name.substring(name.indexOf(".")+1);
+                     }
+                     value.setName(name);
+                  }
+               }
+
+
+               database.createTempRelation(tempJoined);
             }
          }
       }               
@@ -159,32 +267,52 @@ public class LexicalAnalyzer {
       }
    }
 
-   private void Delete(String command)
-   {
+   private void Delete(String command) {
       DeleteParser pDelete = new DeleteParser(command);
-
       String name = pDelete.parseRelationName();
-
       String Where = pDelete.parseWhereClause();
-
       WhereParser wDelete = new WhereParser(Where);
-
       wDelete.parseOrs();
-
       String [][] parsedByAnds = wDelete.parseAnds();
-
       Relation relation = null;
-      try
-      {
-         relation = database.getRelation(name);
-      } catch (Exception e)
-      {
+      try {
+         relation = database.getBaseRelation(name);
+      } catch (Exception e) {
          System.out.println(e);
       }
-
-      if(relation != null)
-      {
+      if(relation != null) {
          relation.delete(parsedByAnds);
+      }
+   }
+   private void Select(String command){
+      SelectParser pSelect = new SelectParser(command);
+      String tempRelationName = pSelect.parseTempName();
+      String baseRelationName = pSelect.parseRelationName();
+      String Where = pSelect.parseWhereClause();
+      Relation baseRelation;
+      try {
+         baseRelation =  database.getRelation(baseRelationName);
+      } catch (Exception e) {
+         System.out.println(e);
+         return;
+      }
+      LinkedList<Attribute> baseSchema = baseRelation.getSchema();
+      LinkedList<Tuple> baseTuple = baseRelation.copyTuples();
+      WhereParser wSelect = new WhereParser(Where);
+      wSelect.parseOrs();
+      String [][] parsedByAnds = wSelect.parseAnds();
+      Relation relation = null;
+      Relation tempRelation = new Relation(tempRelationName);
+      tempRelation.setTuples(baseTuple);
+      tempRelation.setSchema(baseSchema);
+      database.createTempRelation(tempRelation);
+      try {
+         relation = database.getRelation(tempRelationName);
+      } catch (Exception e) {
+         System.out.println(e);
+      }
+      if(relation != null) {
+         tempRelation.select(parsedByAnds);
       }
    }
 
