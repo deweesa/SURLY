@@ -45,11 +45,45 @@ public class JoinParser {
         sc = new Scanner(conditional);
         for(int i = 0; i < 3; i++) {
             joinCondition[i] = sc.next();
-            System.out.println(joinCondition[i]);
         }
 
         return joinCondition;
     }
+
+    public boolean comparable(Attribute attrLeft, Attribute attrRight) {
+        String lDatatype, rDatatype;
+        lDatatype = attrLeft.getDatatype();
+        rDatatype = attrRight.getDatatype();
+
+        return lDatatype.equals(rDatatype);
+    }
+
+    public boolean comparison(String valueLeft, String valueRight, String relop) {
+        int comparison = valueLeft.compareTo(valueRight);
+
+        if(relop.equals("=")){
+            if(comparison == 0) return true;
+            else return false;
+        } else if(relop.equals("!=")){
+            if(comparison != 0) return true;
+            else return false;
+        } else if(relop.equals("<")) {
+            if(comparison < 0) return true;
+            else return false;
+        } else if(relop.equals("<=")) {
+            if(comparison <= 0) return true;
+            else return false;
+        } else if(relop.equals(">")) {
+            if(comparison > 0) return true;
+            else return false;
+        } else if(relop.equals(">=")) {
+            if(comparison >= 0) return true;
+            else return false;
+        } else {
+            return false;
+        }
+    }
+
 
 
 }
