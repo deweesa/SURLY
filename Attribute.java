@@ -2,7 +2,7 @@
  * SURLY 0
  * CSCI 330, 12:00pm
  */
-public class Attribute{
+public class Attribute implements Cloneable{
    private String name;
    private String dataType;
    private int length;
@@ -12,6 +12,10 @@ public class Attribute{
       this.name = name;
       this.dataType = dataType;
       this.length = length;
+   }
+
+   public Object clone() throws CloneNotSupportedException{
+      return super.clone();
    }
 
    public String getName() {

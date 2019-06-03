@@ -58,8 +58,10 @@ public class JoinParser {
         return lDatatype.equals(rDatatype);
     }
 
-    public boolean comparison(String valueLeft, String valueRight, String relop) {
-        int comparison = valueLeft.compareTo(valueRight);
+    public boolean comparison(AttributeValue valueLeft, AttributeValue valueRight, String relop) {
+        String left = valueLeft.getValue();
+        String right = valueRight.getValue();
+        int comparison = left.compareTo(right);
 
         if(relop.equals("=")){
             if(comparison == 0) return true;

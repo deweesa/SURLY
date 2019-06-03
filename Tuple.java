@@ -2,6 +2,14 @@ import java.util.*;
 public class Tuple{
    private LinkedList<AttributeValue> values = new LinkedList<>();
 
+   Tuple(){
+
+   }
+
+   Tuple(Tuple tuple){
+      this.values = (LinkedList) tuple.values.clone();
+   }
+
    public void add(AttributeValue attributeValue)
    {
       values.add(attributeValue);

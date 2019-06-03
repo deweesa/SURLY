@@ -92,11 +92,10 @@ public class SurlyDatabase
    public void createTempRelation(Relation relation)
    {
       String name = relation.getName();
-
-      if(indexOfTemp(name) != -1)
+      int index = indexOfTemp(name);
+      if(index != -1)
       {
-         System.out.println("ERROR: Relation of same name "+name+" already exists.");
-         System.out.println("     Relation failed");
+         tempRelations.set(index, relation);
          return;
       }
 

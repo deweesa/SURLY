@@ -2,6 +2,9 @@
  * SURLY 0
  * CSCI 330, 12:00pm
  */
+import jdk.nashorn.internal.scripts.JO;
+import sun.awt.image.ImageWatched;
+
 import java.io.File;
 import java.util.LinkedList;
 import java.util.Scanner;
@@ -90,7 +93,7 @@ public class LexicalAnalyzer {
          Tuple catalogTuple = new Tuple();
          catalogTuple.add(new AttributeValue("RELATION", pRelation.parseRelationName()));
          catalogTuple.add(new AttributeValue("ATTRIBUTES", Integer.toString(count)));
-         catalog.insert(catalogTuple);
+         catalog.add(catalogTuple);
       }
       else {
          System.out.println("Bad RELATION syntax: unmatched parens");
@@ -133,7 +136,7 @@ public class LexicalAnalyzer {
 
       if (add) {
          tuple.setNames(relation);
-         relation.insert(tuple);
+         relation.add(tuple);
       }
    }
 
@@ -225,29 +228,29 @@ public class LexicalAnalyzer {
          return;
       }
 
-      LinkedList<Attribute> baseSchema = (LinkedList) baseRelation.getSchema().clone();
-      LinkedList<Attribute> tempSchema = new LinkedList<>();
+      LinkedList<Attribute> tempSchema = (LinkedList) baseRelation.getSchema().clone();
+      LinkedList<Attribute> finalSchema = new LinkedList<>();
 
       String[] attributes = pProject.parseAttributes();
 
-      for(int i = 0; i < baseSchema.size(); i++) {
+      for(int i = 0; i < tempSchema.size(); i++) {
          boolean found = false;
          for(int j = 0; j < attributes.length; j++) {
-            if(baseSchema.get(i).getName().equals(attributes[j])){
+            if(tempSchema.get(i).getName().equals(attributes[j])){
                found = true;
             }
          }
 
          if(found){
-            tempSchema.add(baseSchema.get(i));
+            finalSchema.add(tempSchema.get(i));
          }
       }
 
-      LinkedList<Tuple> baseTuple = (LinkedList) baseRelation.getTuples().clone();
-      LinkedList<Tuple> tempTuple = new LinkedList<>();
+      LinkedList<Tuple> tempTuples = (LinkedList) baseRelation.getTuples();
+      LinkedList<Tuple> finalTuples = new LinkedList<>();
 
-      for(int i = 0; i < baseTuple.size(); i++) {
-         Tuple tuple = baseTuple.get(i);
+      for(int i = 0; i < tempTuples.size(); i++) {
+         Tuple tuple = new Tuple(tempTuples.get(i));
 
          for(int j = 0; j < tuple.size(); j++) {
             AttributeValue attrVal = tuple.get(j);
@@ -264,14 +267,14 @@ public class LexicalAnalyzer {
             }
          }
 
-         tempTuple.add(tuple);
+         finalTuples.add(tuple);
       }
 
-      Relation tempRelation = new Relation(tempRelationName);
-      tempRelation.setTuples(tempTuple);
-      tempRelation.setSchema(tempSchema);
+      Relation newRelation = new Relation(tempRelationName);
+      newRelation.setSchema(finalSchema);
+      newRelation.setTuples(finalTuples);
 
-      database.createTempRelation(tempRelation);
+      database.createTempRelation(newRelation);
    }
 
    private void Join(String command) {
@@ -280,146 +283,84 @@ public class LexicalAnalyzer {
       String[] baseRelations = pJoin.parseBaseRelations();
       String[] joinCondition = pJoin.parseJoinCondition();
 
+      int dotIndex = joinCondition[0].indexOf(".");
+      String leftAttributeName = joinCondition[0].substring(dotIndex+1);
+
+      dotIndex = joinCondition[2].indexOf(".");
+      String rightAttributeName = joinCondition[2].substring(dotIndex+1);
+
       Relation baseRelationLeft;
       Relation baseRelationRight;
       try {
-         baseRelationLeft = database.getRelation(baseRelations[0]);
-         baseRelationRight = database.getRelation(baseRelations[1]);
+         baseRelationLeft = (Relation) database.getRelation(baseRelations[0]).clone();
+         baseRelationRight = (Relation) database.getRelation(baseRelations[1]).clone();
       } catch (Exception e) {
          System.out.println(e);
          System.out.println("One or more tables don't exist");
          return;
       }
 
-      LinkedList<Attribute> leftSchema = (LinkedList) baseRelationLeft.getSchema().clone();
-      LinkedList<Attribute> rightSchema = (LinkedList) baseRelationRight.getSchema().clone();
-      LinkedList<Attribute> tempSchema = new LinkedList<>();
+      Relation finalRelation = new Relation(tempName);
+      LinkedList<Attribute> finalSchema = new LinkedList();
+      LinkedList<Attribute> leftSchema = baseRelationLeft.copySchema(); //(LinkedList) baseRelationLeft.getSchema().clone();
+      LinkedList<Attribute> rightSchema = baseRelationRight.copySchema(); //(LinkedList) baseRelationRight.getSchema().clone();
+      LinkedList<Tuple> leftTuples = baseRelationLeft.getTuples();
+      LinkedList<Tuple> rightTuples = baseRelationRight.getTuples();
+      Tuple leftTuple;
+      Tuple rightTuple;
+      Attribute leftAttribute;
+      Attribute rightAttribute;
+      AttributeValue leftValue;
+      AttributeValue rightValue;
 
-      Attribute leftAttr, rightAttr;
+      Tuple newTuple = new Tuple();
 
-      String leftName;
-      String rightName;
+      int leftIndex = baseRelationLeft.getColumnIndex(leftAttributeName);
+      int rightIndex = baseRelationRight.getColumnIndex(rightAttributeName);
 
-      for(int i = 0; i < leftSchema.size(); i++) {
-         leftAttr = leftSchema.get(i);
-         leftName = leftAttr.getName();
-         for(int j = 0; j < rightSchema.size(); j++) {
-            rightAttr = rightSchema.get(j);
-            rightName = rightAttr.getName();
-            if(leftName.equals(rightName)) {
-               leftName = baseRelationLeft.getName()+"."+leftName;
-               rightName = baseRelationRight.getName()+"."+rightName;
+      leftAttribute = leftSchema.get(leftIndex);
+      rightAttribute = rightSchema.get(rightIndex);
 
-               Attribute newLeft = new Attribute(leftName, leftAttr.getDatatype(), leftAttr.getLength());
-               Attribute newRight = new Attribute(rightName, rightAttr.getDatatype(), rightAttr.getLength());
-
-               leftSchema.set(i, newLeft);
-               rightSchema.set(j, newRight);
-            }
-         }
-      }
-
-      tempSchema.addAll(leftSchema);
-      tempSchema.addAll(rightSchema);
-
-      LinkedList<Tuple> leftTuples = baseRelationLeft.copyTuples();
-      LinkedList<Tuple> rightTuples =  baseRelationRight.copyTuples();
-
-      for(int i = 0; i < leftTuples.size(); i++) {
-         Tuple tuples = leftTuples.get(i);
-         for(int j = 0; j < tuples.size(); j++) {
-            AttributeValue attr = tuples.get(j);
-            attr.setName(leftSchema.get(j).getName());
-         }
-
-      }
-
-      for(int i = 0; i < rightTuples.size(); i++) {
-         Tuple tuple = rightTuples.get(i);
-         for(int j = 0; j < tuple.size(); j++) {
-            AttributeValue attr = tuple.get(j);
-            attr.setName(rightSchema.get(j).getName());
-         }
-      }
-
-      Relation tempLeft = new Relation(baseRelations[0]);
-      tempLeft.setSchema(leftSchema);
-      tempLeft.setTuples(leftTuples);
-
-      Relation tempRight = new Relation(baseRelations[1]);
-      tempRight.setSchema(rightSchema);
-      tempRight.setTuples(rightTuples);
-
-      Relation tempJoined = new Relation(tempName);
-      tempJoined.setSchema(tempSchema);
-      LinkedList<Tuple> joinedTuples = new LinkedList<>();
-
-      int leftColumn = tempLeft.getColumnIndex(joinCondition[0]);
-      int rightCoumn = tempRight.getColumnIndex(joinCondition[2]);
-
-      if(!pJoin.comparable(leftSchema.get(leftColumn), rightSchema.get(rightCoumn))) {
-         System.out.println("Error: Non-comparable attributes.");
+      if (!pJoin.comparable(leftAttribute, rightAttribute)) {
+         System.out.println("Not comparabale");
          return;
       }
 
-      for(int i = 0; i < leftTuples.size(); i++) {
-         Tuple leftTuple = leftTuples.get(i);
-         String leftValue = leftTuple.get(leftColumn).getValue();
-         for(int j = 0; j < rightTuples.size(); j++){
-            Tuple rightTuple = rightTuples.get(j);
-            String rightValue = rightTuple.get(rightCoumn).getValue();
+      finalSchema.addAll(leftSchema);
+      finalSchema.addAll(rightSchema);
 
-            if(pJoin.comparison(leftValue, rightValue, joinCondition[1])) {
-               Tuple joined = new Tuple();
-               joined.addAll(leftTuple);
-               joined.addAll(rightTuple);
-               joinedTuples.add(joined);
+      finalRelation.setSchema(finalSchema);
+
+      for (int i = 0; i < leftTuples.size(); i++) {
+         leftTuple = leftTuples.get(i);
+         leftValue = leftTuple.get(leftIndex);
+
+         for (int j = 0; j < rightTuples.size(); j++) {
+            rightTuple = rightTuples.get(j);
+            rightValue = rightTuple.get(rightIndex);
+            if (pJoin.comparison(leftValue, rightValue, joinCondition[1])) {
+               newTuple.addAll(leftTuple);
+               newTuple.addAll(rightTuple);
+               finalRelation.add(newTuple);
+               newTuple = new Tuple();
             }
-
          }
       }
 
-      tempJoined.setTuples(joinedTuples);
-
-      int dotIndex;
-      leftName = leftSchema.get(leftColumn).getName();
-      dotIndex = leftName.lastIndexOf(".")+1;
-      leftName= leftName.substring(dotIndex);
-
-      rightName = rightSchema.get(rightCoumn).getName();
-      dotIndex = rightName.lastIndexOf(".")+1;
-      rightName = rightName.substring(dotIndex);
-
-      if(leftName.equals(rightName)) {
-         tempJoined.removeAttribute(joinCondition[2]);
-      }
-
-      tempSchema = tempJoined.getSchema();
-
-      for(int i = 0; i < tempSchema.size(); i++) {
-         Attribute attribute = tempSchema.get(i);
-         String name = attribute.getName();
-
-         if(name.contains(".")) {
-            name = name.substring(name.indexOf(".")+1);
+      /*for(int i = 0; i < finalSchema.size(); i++)
+      {
+         Attribute tempAttribute = finalSchema.get(i);
+         if(tempAttribute.getName().equals(leftAttributeName)){
+            String name = baseRelations[0]+"."+leftAttributeName;
+            tempAttribute.setName(name);
+            i = finalSchema.size();
          }
-         attribute.setName(name);
+      }*/
+      if(leftAttributeName.equals(rightAttributeName) || joinCondition[1].equals("=")){
+         finalRelation.removeLastAttribute(rightAttributeName);
       }
-
-      for(int i = 0; i < joinedTuples.size(); i++) {
-         Tuple tuple = joinedTuples.get(i);
-         for(int j = 0; j < tuple.size(); j++) {
-            AttributeValue value = tuple.get(j);
-            String name = value.getName();
-
-            if(name.contains(".")) {
-               name = name.substring(name.indexOf(".")+1);
-            }
-            value.setName(name);
-         }
-      }
-
-
-      database.createTempRelation(tempJoined);
+      finalRelation.updateNames(baseRelations[0], baseRelations[1]);
+      //finalRelation.removeAttribute(rightAttributeName);
+      database.createTempRelation(finalRelation);
    }
 }

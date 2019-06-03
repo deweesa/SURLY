@@ -3,7 +3,7 @@ import java.util.LinkedList;
 /**
  * Created by malquib2 on 4/12/19.
  */
-public class Relation {
+public class Relation implements Cloneable{
 
    public String name;
    public LinkedList<Attribute> schema = new LinkedList();
@@ -14,7 +14,7 @@ public class Relation {
       this.name = name;
    }
 
-   public void insert(Tuple tuple)
+   public void add(Tuple tuple)
    {
       tuples.add(tuple);
    }
@@ -23,6 +23,18 @@ public class Relation {
    }
    public String getName() {
       return name;
+   }
+
+   public LinkedList<Attribute> copySchema(){
+      LinkedList<Attribute> copy = new LinkedList<>();
+      for (int i = 0 ; i < schema.size() ; i++){
+         try {
+            copy.add((Attribute) schema.get(i).clone());
+         } catch (Exception e) {
+            System.out.print(e);
+         }
+      }
+      return copy;
    }
 
    public LinkedList<Tuple> copyTuples(){
@@ -46,10 +58,53 @@ public class Relation {
       return -1;
    }
 
+   public void updateNames(String leftTable, String rightTable){
+      String name_one, name_two;
+      for(int i = 0; i < schema.size(); i++){
+         for(int j = i+1; j < schema.size(); j++){
+            name_one = schema.get(i).getName();
+            name_two = schema.get(j).getName();
+            if(name_one.equals(name_two)){
+               name_one = leftTable+"."+name_one;
+               name_two = rightTable+"."+name_two;
+               schema.get(i).setName(name_one);
+               schema.get(j).setName(name_two);
+               for(int k = 0; k < tuples.size(); k++)
+               {
+                  Tuple tuple = tuples.get(k);
+                  tuple.get(i).setName(name_one);
+                  tuple.get(j).setName(name_two);
+               }
+            }
+         }
+      }
+   }
+
+   public Object clone() throws CloneNotSupportedException {
+      return super.clone();
+   }
+
    public void removeAttribute(String atName){
       int index = -1;
 
       for(int i = 0 ; i < schema.size();i++){
+         if(schema.get(i).getName().equals(atName)){
+            index = i;
+         }
+      }
+
+      if(index != -1){
+         schema.remove(index);
+         for(int x = 0 ; x< tuples.size() ; x++){
+            tuples.get(x).remove(index);
+         }
+      }
+   }
+
+   public void removeLastAttribute(String atName){
+      int index = -1;
+
+      for(int i = schema.size()-1 ; i > 0; i--){
          if(schema.get(i).getName().equals(atName)){
             index = i;
          }
@@ -153,7 +208,7 @@ public class Relation {
                length = schema.get(C).getName().length();
             }
 
-            String value = tuples.get(R).getValue(schema.get(C).getName());
+            String value = tuples.get(R).get(C).getValue();
 
             System.out.print("|");
             System.out.printf("%-" + length + "s",value);
