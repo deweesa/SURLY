@@ -5,9 +5,9 @@ import java.util.LinkedList;
  */
 public class Relation implements Cloneable{
 
-   public String name;
-   public LinkedList<Attribute> schema = new LinkedList();
-   public LinkedList<Tuple> tuples = new LinkedList();
+   private String name;
+   private LinkedList<Attribute> schema = new LinkedList();
+   private LinkedList<Tuple> tuples = new LinkedList();
 
    Relation(String name)
    {
@@ -18,9 +18,11 @@ public class Relation implements Cloneable{
    {
       tuples.add(tuple);
    }
+
    public void setName(String name) {
       this.name = name;
    }
+
    public String getName() {
       return name;
    }
@@ -82,23 +84,6 @@ public class Relation implements Cloneable{
 
    public Object clone() throws CloneNotSupportedException {
       return super.clone();
-   }
-
-   public void removeAttribute(String atName){
-      int index = -1;
-
-      for(int i = 0 ; i < schema.size();i++){
-         if(schema.get(i).getName().equals(atName)){
-            index = i;
-         }
-      }
-
-      if(index != -1){
-         schema.remove(index);
-         for(int x = 0 ; x< tuples.size() ; x++){
-            tuples.get(x).remove(index);
-         }
-      }
    }
 
    public void removeLastAttribute(String atName){

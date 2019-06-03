@@ -7,8 +7,6 @@ public class PrintParser {
 
    private String input;
 
-   //public String [] names;
-
    public PrintParser(String input){
       this.input = input;
    }

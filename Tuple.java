@@ -7,7 +7,10 @@ public class Tuple{
    }
 
    Tuple(Tuple tuple){
-      this.values = (LinkedList) tuple.values.clone();
+      for(int i = 0; i < tuple.size(); i++){
+         AttributeValue attrVal = tuple.get(i);
+         this.values.add(attrVal);
+      }
    }
 
    public void add(AttributeValue attributeValue)

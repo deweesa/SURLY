@@ -75,8 +75,7 @@ public class LexicalAnalyzer {
       }               
    }
 
-   private void Relation(String command)
-   {
+   private void Relation(String command) {
       RelationParser pRelation = new RelationParser(command);
       int count = pRelation.parseAttributeCount();
       if(count != -1) {
@@ -91,7 +90,8 @@ public class LexicalAnalyzer {
 
          Relation catalog = database.getCatalog();
          Tuple catalogTuple = new Tuple();
-         catalogTuple.add(new AttributeValue("RELATION", pRelation.parseRelationName()));
+         String relationName = pRelation.parseRelationName();
+         catalogTuple.add(new AttributeValue("RELATION", relationName));
          catalogTuple.add(new AttributeValue("ATTRIBUTES", Integer.toString(count)));
          catalog.add(catalogTuple);
       }
@@ -100,8 +100,7 @@ public class LexicalAnalyzer {
       }
    }
 
-   private void Insert(String command)
-   {
+   private void Insert(String command) {
       InsertParser pInsert = new InsertParser(command);
       Tuple tuple = pInsert.parseTuple();
       String name = pInsert.parseRelationName();
@@ -113,20 +112,27 @@ public class LexicalAnalyzer {
          System.out.println(e);
          return;
       }
+      LinkedList<Attribute> schema = relation.getSchema();
+      int schemaSize = schema.size();
 
-      if(relation.getSchema().size() != tuple.size())
+      if(schemaSize != tuple.size())
       {
          System.out.println("Bad INSERT syntax: tuple count and relation attribute count mismatch");
          return;
       }
 
       boolean add = true;
-      for(int i = 0; i < relation.getSchema().size(); i++)
+      for(int i = 0; i < schemaSize; i++)
       {
-         tuple.get(i).setName(relation.getSchema().get(i).getName());
-         if(relation.getSchema().get(i).getDatatype().equals("NUM"))
+         Attribute attribute = schema.get(i);
+         String attributeName = attribute.getName();
+         AttributeValue attributeValue = tuple.get(i);
+         attributeValue.setName(attributeName);
+
+         String datatype = attribute.getDatatype();
+         if(datatype.equals("NUM"))
          {
-            String value = tuple.getValue(relation.getSchema().get(i).getName());
+            String value = tuple.getValue(attributeName);
             if(!value.matches("[0-9]+"))
             {
                add = false;
@@ -143,20 +149,29 @@ public class LexicalAnalyzer {
    private void Delete(String command) {
       DeleteParser pDelete = new DeleteParser(command);
       String name = pDelete.parseRelationName();
-      String Where = pDelete.parseWhereClause();
-      WhereParser wDelete = new WhereParser(Where);
-      wDelete.parseOrs();
-      String [][] parsedByAnds = wDelete.parseAnds();
+      String where = pDelete.parseWhereClause();
       Relation relation = null;
       try {
          relation = database.getBaseRelation(name);
       } catch (Exception e) {
          System.out.println(e);
       }
+      if(where.equals("")) {
+         try {
+            relation.delete();
+         } catch (Exception e) {
+            return;
+         }
+      }
+
+      WhereParser wDelete = new WhereParser(where);
+      wDelete.parseOrs();
+      String [][] parsedByAnds = wDelete.parseAnds();
       if(relation != null) {
          relation.delete(parsedByAnds);
       }
    }
+
    private void Select(String command){
       SelectParser pSelect = new SelectParser(command);
       String tempRelationName = pSelect.parseTempName();
@@ -189,16 +204,14 @@ public class LexicalAnalyzer {
       }
    }
 
-   private void Destroy(String command)
-   {
+   private void Destroy(String command) {
       DestroyParser pDestroy = new DestroyParser(command);
       String name = pDestroy.parseRelationName();
 
       database.destroyRelation(name);
    }
 
-   private void Print(String command)
-   {
+   private void Print(String command) {
       PrintParser pPrint = new PrintParser(command);
       String[] relations = pPrint.parseRelationNames();
 
@@ -248,15 +261,16 @@ public class LexicalAnalyzer {
 
       LinkedList<Tuple> tempTuples = (LinkedList) baseRelation.getTuples();
       LinkedList<Tuple> finalTuples = new LinkedList<>();
-
+      String valueName;
       for(int i = 0; i < tempTuples.size(); i++) {
          Tuple tuple = new Tuple(tempTuples.get(i));
 
          for(int j = 0; j < tuple.size(); j++) {
             AttributeValue attrVal = tuple.get(j);
+            valueName = attrVal.getName();
             boolean found = false;
             for(int k = 0; k < attributes.length; k++) {
-               if(attributes[k].equals(attrVal.getName())) {
+               if(attributes[k].equals(valueName)) {
                   found = true;
                }
             }
@@ -332,8 +346,8 @@ public class LexicalAnalyzer {
       finalRelation.setSchema(finalSchema);
 
       for (int i = 0; i < leftTuples.size(); i++) {
-         leftTuple = leftTuples.get(i);
-         leftValue = leftTuple.get(leftIndex);
+         leftTuple = new Tuple(leftTuples.get(i));
+         leftValue = new AttributeValue(leftTuple.get(leftIndex));
 
          for (int j = 0; j < rightTuples.size(); j++) {
             rightTuple = rightTuples.get(j);
@@ -347,20 +361,10 @@ public class LexicalAnalyzer {
          }
       }
 
-      /*for(int i = 0; i < finalSchema.size(); i++)
-      {
-         Attribute tempAttribute = finalSchema.get(i);
-         if(tempAttribute.getName().equals(leftAttributeName)){
-            String name = baseRelations[0]+"."+leftAttributeName;
-            tempAttribute.setName(name);
-            i = finalSchema.size();
-         }
-      }*/
       if(leftAttributeName.equals(rightAttributeName) || joinCondition[1].equals("=")){
          finalRelation.removeLastAttribute(rightAttributeName);
       }
       finalRelation.updateNames(baseRelations[0], baseRelations[1]);
-      //finalRelation.removeAttribute(rightAttributeName);
       database.createTempRelation(finalRelation);
    }
 }

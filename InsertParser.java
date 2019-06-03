@@ -18,32 +18,6 @@ public class InsertParser{
       return input.substring(0, input.indexOf(' '));
    }
    
-   public int parseAttributeCount()
-   {
-      int count = 0, index = 0;
-      String attr = input.substring(input.indexOf(' '));
-      
-      while(attr.charAt(index) != ';')
-      {
-         while(Character.isWhitespace(attr.charAt(index))) index++;
-         count++;
-         if(attr.charAt(index) == '\'')
-         {
-            index++;
-            while(attr.charAt(index) != '\'') 
-            {
-               if(attr.charAt(index) == ';') return -1;
-               index++;
-            }
-            index++;
-         } else {
-            while(!Character.isWhitespace(attr.charAt(index)) && attr.charAt(index) != ';')
-               index++;
-         }
-      }
-      return count;
-   }
-   
    public Tuple parseTuple()
    {
       LinkedList<String> values = new LinkedList<>();

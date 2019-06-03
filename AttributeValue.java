@@ -18,8 +18,13 @@ public class AttributeValue {
        this.value = value;
    }
 
+   AttributeValue(AttributeValue attributeValue){
+       this.value = new String(attributeValue.value);
+       this.name = new String(attributeValue.name);
+   }
+
     public void setName(String name) {
-        this.name = name;
+        this.name = String.valueOf(name);
     }
 
     public String getName() {
