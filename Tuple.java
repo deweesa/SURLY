@@ -13,8 +13,9 @@ public class Tuple{
       }
    }
 
-   public void add(AttributeValue attributeValue)
+   public void add(AttributeValue newValue)
    {
+      AttributeValue attributeValue = new AttributeValue(newValue);
       values.add(attributeValue);
    }
 
@@ -59,7 +60,13 @@ public class Tuple{
    }
 
    public void addAll(Tuple newTuple) {
-      this.values.addAll(newTuple.values);
+
+      //this.values.addAll(newTuple.values);
+
+      for(int i = 0; i < newTuple.values.size(); i++){
+         AttributeValue attributeValue = new AttributeValue(newTuple.values.get(i));
+         this.values.add(attributeValue);
+      }
    }
 
    public String toString()

@@ -2,8 +2,8 @@
  * SURLY 0
  * CSCI 330, 12:00pm
  */
-import jdk.nashorn.internal.scripts.JO;
-import sun.awt.image.ImageWatched;
+//import jdk.nashorn.internal.scripts.JO;
+//import sun.awt.image.ImageWatched;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -318,8 +318,8 @@ public class LexicalAnalyzer {
       LinkedList<Attribute> finalSchema = new LinkedList();
       LinkedList<Attribute> leftSchema = baseRelationLeft.copySchema(); //(LinkedList) baseRelationLeft.getSchema().clone();
       LinkedList<Attribute> rightSchema = baseRelationRight.copySchema(); //(LinkedList) baseRelationRight.getSchema().clone();
-      LinkedList<Tuple> leftTuples = baseRelationLeft.getTuples();
-      LinkedList<Tuple> rightTuples = baseRelationRight.getTuples();
+      LinkedList<Tuple> leftTuples = (LinkedList<Tuple>) baseRelationLeft.getTuples().clone();
+      LinkedList<Tuple> rightTuples = (LinkedList<Tuple>) baseRelationRight.getTuples().clone();
       Tuple leftTuple;
       Tuple rightTuple;
       Attribute leftAttribute;
@@ -336,7 +336,7 @@ public class LexicalAnalyzer {
       rightAttribute = rightSchema.get(rightIndex);
 
       if (!pJoin.comparable(leftAttribute, rightAttribute)) {
-         System.out.println("Not comparabale");
+         System.out.println("Not comparable");
          return;
       }
 

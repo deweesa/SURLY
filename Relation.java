@@ -1,3 +1,5 @@
+import org.w3c.dom.Attr;
+
 import java.util.LinkedList;
 
 /**
@@ -69,13 +71,17 @@ public class Relation implements Cloneable{
             if(name_one.equals(name_two)){
                name_one = leftTable+"."+name_one;
                name_two = rightTable+"."+name_two;
-               schema.get(i).setName(name_one);
-               schema.get(j).setName(name_two);
+               Attribute attribute_one = schema.get(i);
+               Attribute attribute_two = schema.get(j);
+               attribute_one.setName(name_one);
+               attribute_two.setName(name_two);
                for(int k = 0; k < tuples.size(); k++)
                {
                   Tuple tuple = tuples.get(k);
-                  tuple.get(i).setName(name_one);
-                  tuple.get(j).setName(name_two);
+                  AttributeValue attributeValue_one = tuple.get(i);
+                  AttributeValue attributeValue_two = tuple.get(j);
+                  attributeValue_one.setName(name_one);
+                  attributeValue_two.setName(name_two);
                }
             }
          }
@@ -149,11 +155,12 @@ public class Relation implements Cloneable{
       int totalLength = -1;
       String brk = "";
       for(int x = 0 ; x < schema.size(); x++){
-
-         if (schema.get(x).getLength() > schema.get(x).getName().length() ){
-            totalLength += schema.get(x).getLength()+1;
+         Attribute attribute = schema.get(x);
+         String attributeName = attribute.getName();
+         if (attribute.getLength() > attributeName.length() ){
+            totalLength += attribute.getLength()+1;
          }else{
-            totalLength += schema.get(x).getName().length()+1;
+            totalLength += attributeName.length()+1;
          }
       }
       for(int x = 0; x < totalLength+2; x++)
@@ -171,9 +178,9 @@ public class Relation implements Cloneable{
 
    public void printAttributes() throws Exception {
       for(int y = 0 ; y < schema.size(); y++){
-
-         int length = schema.get(y).getLength();
-         String attributeName = schema.get(y).getName();
+         Attribute attribute = schema.get(y);
+         int length = attribute.getLength();
+         String attributeName = attribute.getName();
 
          System.out.print("|");
          System.out.printf("%-" + length + "s",attributeName);
@@ -187,13 +194,17 @@ public class Relation implements Cloneable{
 
          for(int C = 0 ; C < schema.size(); C++){
             int length;
-            if(schema.get(C).getLength() > schema.get(C).getName().length() ){
-               length = schema.get(C).getLength();
+            Attribute attribute = schema.get(C);
+            String attributeName = attribute.getName();
+            if(attribute.getLength() > attributeName.length() ){
+               length = attribute.getLength();
             }else{
-               length = schema.get(C).getName().length();
+               length = attributeName.length();
             }
 
-            String value = tuples.get(R).get(C).getValue();
+            Tuple tuple = tuples.get(R);
+            AttributeValue attributeValue = tuple.get(C);
+            String value = attributeValue.getValue();
 
             System.out.print("|");
             System.out.printf("%-" + length + "s",value);
